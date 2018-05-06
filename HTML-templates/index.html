@@ -11,8 +11,26 @@
     <div id="container">DIV container for Handlebars result!</div>
 
     <script id="entry-template" type="text/x-handlebars-template">
-        {{#table}}
-        {{/table}}
+        <table>
+        <thead>
+        <tr>
+            <th>#</th>
+        {{#each headers}}
+            <th>{{this}}</th>
+        {{/each}}
+        </tr>
+        </thead>
+        <tbody>
+            {{#each items}}
+            <tr>
+                <td>{{@index}}</td>
+                {{#each this}}
+                <td>{{this}}</td>
+                {{/each}}
+            </tr>
+            {{/each}}
+        </tbody>
+        </table>
     </script>
 
     <script src="http://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
