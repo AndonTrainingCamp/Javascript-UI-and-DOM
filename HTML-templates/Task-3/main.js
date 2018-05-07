@@ -3,34 +3,42 @@
 'use strict';
 
 (function ($) {
-    $.fn.listview = function (list) {
-
+    $.fn.listview = function (data) {
+        let source = $('body script[type="text/handlebars-template"]');
+        if (source.length !== 0) {
+            for (let i = 0; i < source.length; i++) {
+                const srcID = $(source[i]).attr('id');
+                let template = Handlebars.compile($(source[i]).html());
+                for (let j = 0; j < data.length; j++) {
+                    let result = template(data[j]);
+                    let $result = $(result);
+                    $('body *[data-template="' + srcID + '"]').append($result);
+                }
+                $(source[i]).remove();
+            }
+        } else {
+            return;
+        }
     }
 }(jQuery));
 
-function setTemplate(el, context) {
-    // Handlebars.registerHelper('table', function(items) {
-    //     let out = '<table class="items-table"><thead><tr><th>#';
-    //     items = context;
-    //     for (let el of items.headers) {
-    //         out += '<th>' + el + '</th>';
-    //     }
-    //     out += '</th></tr></thead>';
-    //     out += '<tbody>';
-    //     for (let index in items.items) {
-    //         out += '<tr><td>' + index + '</td>';
-    //         for (let value in items.items[index]) {
-    //             out += '<td>' + items.items[index][value] + '</td>';
-    //         }
-    //         out += '</tr>';
-    //     }
-    //     out += '</tbody></table>'
-    //     return new Handlebars.SafeString(out);
-    // });
-    let source = document.getElementById('entry-template').innerHTML;
-    let template = Handlebars.compile(source);
-    let html = template(context);
-    el.html(html);
+// TEST 1: Expect to work with the sample
+var data = [],
+    count = 5,
+    id = 'students-table';
+
+document.body.innerHTML = '<table><thead><tr><th>#</th><th>Name</th><th>Mark</th></tr></thead>' +
+    '<tbody id="' + id + '" data-template="students-row-template"></tbody></table>' +
+    '<script id="students-row-template" type="text/handlebars-template"><tr class="student-row"><td>{{number}}</td><td>{{name}}</td><td>{{mark}}</td></tr></script>';
+
+for (var i = 0; i < count; i += 1) {
+    var number = i + 1;
+    var name = `Student ${i + 1}`;
+    var mark = i % 5 + 2;
+    data.push({
+        number,
+        name,
+        mark
+    });
 }
-let container = $('#container');
-setTemplate(container, inputData);
+$('#' + id).listview(data);
