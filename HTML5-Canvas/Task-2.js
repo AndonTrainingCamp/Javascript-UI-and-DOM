@@ -42,8 +42,11 @@ function main() {
             ctx.canvas.height = window.innerHeight;
             if (ellipse.x > ctx.canvas.width) {
                 ellipse.x = ctx.canvas.width - ellipse.r - sx - 1;
+            }
+            if (ellipse.y > ctx.canvas.height) {
                 ellipse.y = ctx.canvas.height - ellipse.r - sy - 1;
             }
+            
         });
         ellipse.drawEllipse();
         ellipse.x += sx;
