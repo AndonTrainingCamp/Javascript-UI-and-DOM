@@ -39,6 +39,7 @@ function main() {
     let obstacles = [];
 
     let head = new Rect();
+
     window.addEventListener('resize', function () {
         ctx.canvas.width = window.innerWidth;
         ctx.canvas.height = window.innerHeight;
@@ -50,35 +51,36 @@ function main() {
         }
     });
 
-    for (let i = 0; i < window.innerWidth / 50; i++) {
+    window.addEventListener('keyup', function (event) {
+        if (event.key === 'w') {
+            sy = -1;
+            sx = 0;
+        }
+        if (event.key === 's') {
+            sy = 1;
+            sx = 0;
+        }
+        if (event.key === 'a') {
+            sx = -1;
+            sy = 0;
+        }
+        if (event.key === 'd') {
+            sx = 1;
+            sy = 0;
+        }
+    });
+
+    for (let i = 0; i < window.innerWidth / 30; i++) {
         let food = new Rect(null, null, null, null, 'rgb(66, 229, 71)');
-        food.drawRect();
         foods.push(food);
     }
 
     function snakeAnimation() {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        foods.forEach(el => el.drawRect());
         head.drawRect();
         head.x += sx;
         head.y += sy;
-
-        window.addEventListener('keyup', function (event) {
-            if (event.key === 'w') {
-                sy = -1;
-                sx = 0;
-            }
-            if (event.key === 's') {
-                sy = 1;
-                sx = 0;
-            }
-            if (event.key === 'a') {
-                sx = -1;
-                sy = 0;
-            }
-            if (event.key === 'd') {
-                sx = 1;
-                sy = 0;
-            }
-        });
 
         if (head.x >= ctx.canvas.width - head.a || head.x <= 0) {
             sx *= -1;
