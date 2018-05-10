@@ -32,8 +32,7 @@ function main() {
         };
     }
 
-    let head = new Rect();
-    let snakeTail = [];
+    let snake = [];
     let foods = [];
 
     let sx = 0;
@@ -41,14 +40,15 @@ function main() {
     let speed = 1;
     let direction = '';
 
+    snake[0] = new Rect(); // The _head_ of the snake
     window.addEventListener('resize', function () {
         ctx.canvas.width = window.innerWidth;
         ctx.canvas.height = window.innerHeight;
-        if (head.x > ctx.canvas.width) {
-            head.x = ctx.canvas.width - head.a - sx - 1;
+        if (snake[0].x > ctx.canvas.width) {
+            snake[0].x = ctx.canvas.width - snake[0].a - sx - 1;
         }
-        if (head.y > ctx.canvas.height) {
-            head.y = ctx.canvas.height - head.b - sy - 1;
+        if (snake[0].y > ctx.canvas.height) {
+            snake[0].y = ctx.canvas.height - snake[0].b - sy - 1;
         }
     });
 
@@ -83,42 +83,44 @@ function main() {
     function snakeAnimation() {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         foods.forEach(el => el.drawRect());
-        head.drawRect();
-        head.x += sx; // Head moving
-        head.y += sy;
-
-        for (let i = 0, j = 10; i < snakeTail.length; i++, j += 10) {
-            if (direction === 'up') {
-                snakeTail[i].x = head.x;
-                snakeTail[i].y = head.y + j;
-                snakeTail[i].drawRect();
-            } else if (direction === 'down') {
-                snakeTail[i].x = head.x;
-                snakeTail[i].y = head.y - j;
-                snakeTail[i].drawRect();
-            } else if (direction === 'left') {
-                snakeTail[i].x = head.x + j;
-                snakeTail[i].y = head.y;
-                snakeTail[i].drawRect();
-            } else if (direction === 'right') {
-                snakeTail[i].x = head.x - j;
-                snakeTail[i].y = head.y;
-                snakeTail[i].drawRect();
-            }
-        }
+        snake[0].drawRect();
+        snake[0].x += sx; // Head moving
+        snake[0].y += sy;
 
         for (let i = 0; i < foods.length; i++) {
-            if (head.x <= foods[i].x + 9 && head.x >= foods[i].x - 19 &&
-                head.y <= foods[i].y + 9 && head.y >= foods[i].y - 19) {
+            if (snake[0].x <= foods[i].x + 9 && snake[0].x >= foods[i].x - 19 &&
+                snake[0].y <= foods[i].y + 9 && snake[0].y >= foods[i].y - 19) {
                 let newPiece = new Rect(null, null, randomColor());
-                snakeTail.push(newPiece);
+                snake.push(newPiece);
                 foods.splice(i, 1);
             }
         }
 
-        if (head.x >= ctx.canvas.width - head.a || head.x <= 0) {
+        if (snake.length > 1) {
+            for (let i = 0, j = 10; i < snake.length - 1; i++ , j += 10) {
+                if (direction === 'up') {
+                    snake[i + 1].x = snake[i].x;
+                    snake[i + 1].y = snake[i].y + j;
+                    snake[i + 1].drawRect();
+                } else if (direction === 'down') {
+                    snake[i + 1].x = snake[i].x;
+                    snake[i + 1].y = snake[i].y - j;
+                    snake[i + 1].drawRect();
+                } else if (direction === 'left') {
+                    snake[i + 1].x = snake[i].x + j;
+                    snake[i + 1].y = snake[i].y;
+                    snake[i + 1].drawRect();
+                } else if (direction === 'right') {
+                    snake[i + 1].x = snake[i].x - j;
+                    snake[i + 1].y = snake[i].y;
+                    snake[i + 1].drawRect();
+                }
+            }
+        }
+
+        if (snake[0].x >= ctx.canvas.width - snake[0].a || snake[0].x <= 0) {
             sx *= -1;
-        } else if (head.y >= ctx.canvas.height - head.b || head.y <= 0) {
+        } else if (snake[0].y >= ctx.canvas.height - snake[0].b || snake[0].y <= 0) {
             sy *= -1;
         }
         window.requestAnimationFrame(snakeAnimation);
