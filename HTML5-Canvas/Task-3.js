@@ -20,25 +20,26 @@ function main() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
 
-    function Rect(x, y, a, b, color) {
-        this.x = x || Math.random() * ctx.canvas.width; // Initial values
-        this.y = y || Math.random() * ctx.canvas.height;
+    function Rect(a, b, color) {
+        this.x = Math.floor(Math.random() * ctx.canvas.width); // Initial values
+        this.y = Math.floor(Math.random() * ctx.canvas.height);
         this.a = a || 20;
         this.b = b || 20;
-        this.color = color || 'rgb(123, 180, 224)';
+        this.color = color || 'rgb(237, 126, 16)';
         this.drawRect = function () {
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.a, this.b, );
         };
     }
 
-    let sx = 0;
-    let sy = 0;
-    let snake = [];
+    let head = new Rect();
+    let snakeTail = [];
     let foods = [];
     let obstacles = [];
 
-    let head = new Rect();
+    let sx = 0;
+    let sy = 0;
+    let speed = 1;
 
     window.addEventListener('resize', function () {
         ctx.canvas.width = window.innerWidth;
@@ -51,27 +52,27 @@ function main() {
         }
     });
 
-    window.addEventListener('keyup', function (event) {
+    document.querySelector('body').addEventListener('keydown', function (event) {
         if (event.key === 'w') {
-            sy = -1;
+            sy = -speed;
             sx = 0;
         }
         if (event.key === 's') {
-            sy = 1;
+            sy = speed;
             sx = 0;
         }
         if (event.key === 'a') {
-            sx = -1;
+            sx = -speed;
             sy = 0;
         }
         if (event.key === 'd') {
-            sx = 1;
+            sx = speed;
             sy = 0;
         }
     });
 
-    for (let i = 0; i < window.innerWidth / 30; i++) {
-        let food = new Rect(null, null, null, null, 'rgb(66, 229, 71)');
+    for (let i = 0; i < window.innerWidth * 6; i++) {
+        let food = new Rect(10, 10, 'rgb(132, 201, 12)');
         foods.push(food);
     }
 
@@ -79,7 +80,16 @@ function main() {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         foods.forEach(el => el.drawRect());
         head.drawRect();
-        head.x += sx;
+        
+        for (let i = 0; i < foods.length; i++) {
+            if (head.x <= foods[i].x + 9 && head.x >= foods[i].x - 19 &&
+                head.y <= foods[i].y + 9 && head.y >= foods[i].y - 19) {
+                    snakeTail.push(foods[i]);
+                    foods.splice(i, 1);
+            }
+        }
+
+        head.x += sx;  // Head moving
         head.y += sy;
 
         if (head.x >= ctx.canvas.width - head.a || head.x <= 0) {
