@@ -49,8 +49,14 @@ function main() {
                 if (!this.offset) {
                     this.offset = (snake.length - 1) * 20;
                 }
-                if (false) {
-                    //this.target.length !== 0
+                if (this.target.length !== 0) {
+                    if (this.x !== this.target[0].x) {
+                        this.x += this.target[0].sx;
+                        this.y += this.target[0].sy;
+                        ctx.fillRect(this.x - this.offset * this.target[0].sx, this.y - this.offset * this.target[0].sy, this.a, this.b);
+                    } else {
+                        this.target.shift();
+                    }
                 } else {
                     this.x += sx;
                     this.y += sy;
@@ -94,7 +100,7 @@ function main() {
 
     // Creating food
 
-    for (let i = 0; i < window.innerWidth / 10; i++) {
+    for (let i = 0; i < 1/*window.innerWidth / 10 */; i++) {
         let x = Math.floor(Math.random() * ctx.canvas.width); // Initial values
         let y = Math.floor(Math.random() * ctx.canvas.height);
         let food = new Rect(x, y, 'f');
