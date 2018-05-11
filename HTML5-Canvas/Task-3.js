@@ -20,27 +20,47 @@ function main() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
 
-    function Rect(a, b, color) {
-        this.x = Math.floor(Math.random() * ctx.canvas.width); // Initial values
-        this.y = Math.floor(Math.random() * ctx.canvas.height);
-        this.a = a || 20;
-        this.b = b || 20;
-        this.color = color || 'rgb(255, 79, 252)';
-        this.drawRect = function () {
-            ctx.fillStyle = this.color;
-            ctx.fillRect(this.x, this.y, this.a, this.b);
-        };
-    }
-
     let snake = [];
     let foods = [];
 
-    let sx = 0;
+    let sx = 1; // Starts forward at the begging 
     let sy = 0;
     let speed = 1;
-    let direction = '';
+    let isDirectionHit = false;
 
-    snake[0] = new Rect(); // The _head_ of the snake
+    function Rect(x, y, type) {
+        this.type = type; // f - food, h - head, b - body
+        this.x = x;
+        this.y = y;
+        this.offset = undefined;
+        this.target = [];
+        this.a = 20;
+        this.b = 20;
+        this.color = 'rgb(255, 79, 252)';
+        this.drawRect = function () {
+            ctx.fillStyle = this.color;
+            if (this.type === 'f') {
+                ctx.fillRect(this.x, this.y, this.a, this.b);
+            } else if (this.type === 'h') {
+                this.x += sx;
+                this.y += sy;
+                ctx.fillRect(this.x, this.y, this.a, this.b);
+            } else if (this.type === 'b') {
+                if (!this.offset) {
+                    this.offset = (snake.length - 1) * 20;
+                }
+                if (false) {
+                    //this.target.length !== 0
+                } else {
+                    this.x += sx;
+                    this.y += sy;
+                    ctx.fillRect(this.x - this.offset * sx, this.y - this.offset * sy, this.a, this.b);
+                }
+            }
+        };
+    }
+    snake[0] = new Rect(0, 0, 'h'); // The _head_ of the snake
+
     window.addEventListener('resize', function () {
         ctx.canvas.width = window.innerWidth;
         ctx.canvas.height = window.innerHeight;
@@ -56,27 +76,31 @@ function main() {
         if (event.key === 'w') {
             sy = -speed;
             sx = 0;
-            direction = 'up';
-        }
-        if (event.key === 's') {
+            if (snake.length > 1) isDirectionHit = true;
+        } else if (event.key === 's') {
             sy = speed;
             sx = 0;
-            direction = 'down';
-        }
-        if (event.key === 'a') {
+            if (snake.length > 1) isDirectionHit = true;
+        } else if (event.key === 'a') {
             sx = -speed;
             sy = 0;
-            direction = 'left';
-        }
-        if (event.key === 'd') {
+            if (snake.length > 1) isDirectionHit = true;
+        } else if (event.key === 'd') {
             sx = speed;
             sy = 0;
-            direction = 'right';
+            if (snake.length > 1) isDirectionHit = true;
         }
     });
 
+    // Creating food
+
     for (let i = 0; i < window.innerWidth / 10; i++) {
-        let food = new Rect(10, 10, 'rgb(132, 201, 12)');
+        let x = Math.floor(Math.random() * ctx.canvas.width); // Initial values
+        let y = Math.floor(Math.random() * ctx.canvas.height);
+        let food = new Rect(x, y, 'f');
+        food.a = 10;
+        food.b = 10;
+        food.color = 'rgb(132, 201, 12)';
         foods.push(food);
     }
 
@@ -84,39 +108,38 @@ function main() {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         foods.forEach(el => el.drawRect());
         snake[0].drawRect();
-        snake[0].x += sx; // Head moving
-        snake[0].y += sy;
+
+        if (isDirectionHit && snake.length > 1) {
+            for (let i = 1; i < snake.length; i++) {
+                snake[i].target.push({
+                    x: snake[0].x,
+                    y: snake[0].y,
+                    sx: sx,
+                    sy: sy
+                });
+            }
+            isDirectionHit = false;
+        }
+
+        if (snake.length > 1) {
+            for (let i = 1; i < snake.length; i++) {
+                snake[i].drawRect();
+            }
+        }
+
+        // Collision detection with the food
 
         for (let i = 0; i < foods.length; i++) {
             if (snake[0].x <= foods[i].x + 9 && snake[0].x >= foods[i].x - 19 &&
                 snake[0].y <= foods[i].y + 9 && snake[0].y >= foods[i].y - 19) {
-                let newPiece = new Rect(null, null, randomColor());
+                let newPiece = new Rect(snake[0].x, snake[0].y, 'b');
+                newPiece.color = randomColor();
                 snake.push(newPiece);
                 foods.splice(i, 1);
             }
         }
 
-        if (snake.length > 1) {
-            for (let i = 0, j = 10; i < snake.length - 1; i++ , j += 10) {
-                if (direction === 'up') {
-                    snake[i + 1].x = snake[i].x;
-                    snake[i + 1].y = snake[i].y + j;
-                    snake[i + 1].drawRect();
-                } else if (direction === 'down') {
-                    snake[i + 1].x = snake[i].x;
-                    snake[i + 1].y = snake[i].y - j;
-                    snake[i + 1].drawRect();
-                } else if (direction === 'left') {
-                    snake[i + 1].x = snake[i].x + j;
-                    snake[i + 1].y = snake[i].y;
-                    snake[i + 1].drawRect();
-                } else if (direction === 'right') {
-                    snake[i + 1].x = snake[i].x - j;
-                    snake[i + 1].y = snake[i].y;
-                    snake[i + 1].drawRect();
-                }
-            }
-        }
+        // Collision detection with the walls
 
         if (snake[0].x >= ctx.canvas.width - snake[0].a || snake[0].x <= 0) {
             sx *= -1;
@@ -125,10 +148,10 @@ function main() {
         }
         window.requestAnimationFrame(snakeAnimation);
     }
-}
 
-function randomColor() {
-    return 'rgb(' + Math.floor(Math.random() * 100 + 100) +
-        ', ' + Math.floor(Math.random() * 155) +
-        ', ' + Math.floor(Math.random() * 100 + 155) + ')';
+    function randomColor() {
+        return 'rgb(' + Math.floor(Math.random() * 100 + 100) +
+            ', ' + Math.floor(Math.random() * 155) +
+            ', ' + Math.floor(Math.random() * 100 + 155) + ')';
+    }
 }
