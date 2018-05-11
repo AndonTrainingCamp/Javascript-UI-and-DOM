@@ -36,6 +36,7 @@ function main() {
         this.target = [];
         this.a = 20;
         this.b = 20;
+        this.isFirst = true;
         this.color = 'rgb(255, 79, 252)';
         this.drawRect = function () {
             ctx.fillStyle = this.color;
@@ -58,9 +59,14 @@ function main() {
                         this.target.shift();
                     }
                 } else {
+                    if (this.isFirst) {
+                        this.x = this.x - this.offset * sx;
+                        this.y = this.y - this.offset * sy;
+                        this.isFirst = false;
+                    }
                     this.x += sx;
                     this.y += sy;
-                    ctx.fillRect(this.x - this.offset * sx, this.y - this.offset * sy, this.a, this.b);
+                    ctx.fillRect(this.x, this.y, this.a, this.b);
                 }
             }
         };
@@ -78,20 +84,31 @@ function main() {
         }
     });
 
+    let historySX;
+    let historySY;
+
     document.querySelector('body').addEventListener('keydown', function (event) {
         if (event.key === 'w') {
+            historySX = sx;
+            historySY = sy;
             sy = -speed;
             sx = 0;
             if (snake.length > 1) isDirectionHit = true;
         } else if (event.key === 's') {
+            historySX = sx;
+            historySY = sy;
             sy = speed;
             sx = 0;
             if (snake.length > 1) isDirectionHit = true;
         } else if (event.key === 'a') {
+            historySX = sx;
+            historySY = sy;
             sx = -speed;
             sy = 0;
             if (snake.length > 1) isDirectionHit = true;
         } else if (event.key === 'd') {
+            historySX = sx;
+            historySY = sy;
             sx = speed;
             sy = 0;
             if (snake.length > 1) isDirectionHit = true;
@@ -100,7 +117,7 @@ function main() {
 
     // Creating food
 
-    for (let i = 0; i < 1/*window.innerWidth / 10 */; i++) {
+    for (let i = 0; i < 100; i++) {
         let x = Math.floor(Math.random() * ctx.canvas.width); // Initial values
         let y = Math.floor(Math.random() * ctx.canvas.height);
         let food = new Rect(x, y, 'f');
@@ -115,22 +132,23 @@ function main() {
         foods.forEach(el => el.drawRect());
         snake[0].drawRect();
 
+        if (snake.length > 1) {
+            for (let i = 1; i < snake.length; i++) {
+                snake[i].drawRect();
+            }
+        }
         if (isDirectionHit && snake.length > 1) {
             for (let i = 1; i < snake.length; i++) {
                 snake[i].target.push({
                     x: snake[0].x,
                     y: snake[0].y,
-                    sx: sx,
-                    sy: sy
+                    sx: historySX,
+                    sy: historySY
                 });
+                console.log(snake[i].target[0].x + ' ' + snake[i].target[0].y);
+                console.log(snake[i].target[0].sx + ' ' + snake[i].target[0].sy);
             }
             isDirectionHit = false;
-        }
-
-        if (snake.length > 1) {
-            for (let i = 1; i < snake.length; i++) {
-                snake[i].drawRect();
-            }
         }
 
         // Collision detection with the food
