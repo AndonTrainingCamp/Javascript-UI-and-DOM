@@ -53,7 +53,7 @@ function main() {
                     if (this.x !== this.target[0].x) {
                         this.x += this.target[0].sx;
                         this.y += this.target[0].sy;
-                        ctx.fillRect(this.x - this.offset * this.target[0].sx, this.y - this.offset * this.target[0].sy, this.a, this.b);
+                        ctx.fillRect(this.x, this.y, this.a, this.b);
                     } else {
                         this.target.shift();
                     }
